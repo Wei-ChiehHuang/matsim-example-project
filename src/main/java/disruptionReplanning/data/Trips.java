@@ -2,7 +2,7 @@ package disruptionReplanning.data;
 
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
-import org.matsim.vehicles.Vehicle;
+import org.matsim.pt.transitSchedule.api.TransitStopFacility;
 
 public class Trips {
 
@@ -23,7 +23,7 @@ public class Trips {
     boolean interrupted = false;
     String interruptionType;
     Coord interruptedCoords;
-    Id<Vehicle> interruptedVehicle;
+    Id<TransitStopFacility> interruptedStopFacility;
     boolean interruption10 = false;
     boolean interruption20 = false;
     boolean interruption60 = false;
@@ -32,7 +32,7 @@ public class Trips {
     boolean interrupted_return = false;
     String interruptionType_return;
     Coord interruptedCoords_return;
-    Id<Vehicle> interruptedVehicle_return;
+    Id<TransitStopFacility> interruptedStopFacility_return;
     boolean interruption10_return = false;
     boolean interruption20_return = false;
     boolean interruption60_return = false;
@@ -143,20 +143,20 @@ public class Trips {
         this.interruptedCoords_return = interruptedCoords_return;
     }
 
-    public Id<Vehicle> getInterruptedVehicle() {
-        return interruptedVehicle;
+    public Id<TransitStopFacility> getInterruptedStopFacility() {
+        return interruptedStopFacility;
     }
 
-    public void setInterruptedVehicle(Id<Vehicle> interruptedVehicle) {
-        this.interruptedVehicle = interruptedVehicle;
+    public void setInterruptedStopFacility(Id<TransitStopFacility> interruptedStopFacility) {
+        this.interruptedStopFacility = interruptedStopFacility;
     }
 
-    public Id<Vehicle> getInterruptedVehicle_return() {
-        return interruptedVehicle_return;
+    public Id<TransitStopFacility> getInterruptedStopFacility_return() {
+        return interruptedStopFacility_return;
     }
 
-    public void setInterruptedVehicle_return(Id<Vehicle> interruptedVehicle_return) {
-        this.interruptedVehicle_return = interruptedVehicle_return;
+    public void setInterruptedStopFacility_return(Id<TransitStopFacility> interruptedStopFacility_return) {
+        this.interruptedStopFacility_return = interruptedStopFacility_return;
     }
 
     public boolean isInterruption10() {

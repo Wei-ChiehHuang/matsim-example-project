@@ -5,15 +5,25 @@ import disruptionReplanning.createMatsimPlans.Trips2Plans;
 import disruptionReplanning.data.Dataset;
 import disruptionReplanning.data.PublicTransportLines;
 import disruptionReplanning.data.Trips;
+import disruptionReplanning.io.WriteIntermediateList;
 import org.apache.log4j.Logger;
+import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.core.api.experimental.events.EventsManager;
+import org.matsim.core.config.Config;
+import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.events.EventsReaderXMLv1;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.handler.EventHandler;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
+import org.matsim.core.scenario.ScenarioUtils;
+import org.matsim.pt.transitSchedule.TransitScheduleReaderV1;
+import org.matsim.pt.transitSchedule.TransitScheduleUtils;
+import org.matsim.pt.transitSchedule.api.TransitSchedule;
+import org.matsim.pt.transitSchedule.api.TransitScheduleReader;
+import org.matsim.pt.transitSchedule.api.TransitStopFacility;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -27,10 +37,21 @@ public class IdentifyAffectedCommuters {
 
     private static final String LinesListPath = "Z:/indiv/wei/Master Thesis/Thesis/ScenarioAnalysis/network/PublicTransportLines.csv";
     private static final String TripsListPath = "Z:/indiv/wei/Master Thesis/Thesis/ScenarioAnalysis/mucSP/trips.csv";
-
+    private static final String NetworkPath = "Z:/indiv/wei/Master Thesis/Thesis/ScenarioAnalysis/mucSP/initialAssignment/output_network.xml.gz";
+    private static final String TransitSchedulePath = "Z:/indiv/wei/Master Thesis/Thesis/ScenarioAnalysis/network/schedule2018.xml";
+    private static final String EventPath = "Z:/indiv/wei/Master Thesis/Thesis/ScenarioAnalysis/mucSP/initialAssignment/output_events.xml.gz";
+    private static final String csvFile = "Z:/indiv/wei/Master Thesis/Thesis/ScenarioAnalysis/mucSP/trips_intermediate.csv";
     public static Map<Integer, PublicTransportLines> lineMap = new HashMap<>();
 
+    public static Scenario scenario;
+
     public static void main(String[] args) throws IOException {
+
+        Config config = ConfigUtils.createConfig();
+        config.network().setInputFile(NetworkPath);
+        config.transit().setTransitScheduleFile(TransitSchedulePath);
+
+        scenario = ScenarioUtils.loadScenario(config);
 
         Trips2Plans trips2plans = new Trips2Plans();
         trips2plans.readTrips(TripsListPath);
@@ -38,28 +59,18 @@ public class IdentifyAffectedCommuters {
         readPTLineList(LinesListPath);
         Dataset.setLineMap(lineMap);
 
-        EventsManager events = EventsUtils.createEventsManager();
-        Network network = NetworkUtils.createNetwork();
-        MatsimNetworkReader networkReader = new MatsimNetworkReader(network);
-        networkReader.readFile("Z:/indiv/wei/Master Thesis/Thesis/ScenarioAnalysis/mucSP/initialAssignment/output_network.xml.gz");
+        EventsManager events1 = EventsUtils.createEventsManager();
 
-        AffectedCommutersEventHandler disruptionHandler = new AffectedCommutersEventHandler();
-        events.addHandler(disruptionHandler);
+        AffectedCommutersEventHandler affectedCommuterEventHandler = new AffectedCommutersEventHandler(scenario.getTransitSchedule());
+        events1.addHandler(affectedCommuterEventHandler);
 
-        EventsReaderXMLv1 eventsReader = new EventsReaderXMLv1(events);
-        eventsReader.readFile("Z:/indiv/wei/Master Thesis/Thesis/ScenarioAnalysis/mucSP/initialAssignment/output_events.xml.gz");
+        EventsReaderXMLv1 eventsReader1 = new EventsReaderXMLv1(events1);
+        eventsReader1.readFile(EventPath);
 
-        Map<Integer, Trips> temp = Dataset.getTripMap();
-        for (int t = 0; t < temp.size(); t++) {
-            if(temp.get(t).isInterrupted()){
-                System.out.println(temp.get(t).getTripId());
-                System.out.println(temp.get(t).getInterruptedVehicle());
-                System.out.println(temp.get(t).getInterruptionType());
-            }
-        }
-        System.out.println("check");
-        //output a new trip table
-        //output new plans
+        WriteIntermediateList writeIntermediateList = new WriteIntermediateList();
+        writeIntermediateList.printCSV(csvFile);
+
+        //TODO output new plans
 
     }
 
